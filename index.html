@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <!-- GOOGLE API -->
-    <script async defer src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOxInzn6kIWVjSkzObXhchM0aBhPJ0RIw&callback=initMap"></script>
+    <script async defer src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVAP8W5ov8_LcmwnXUjMkN9W8qNk0ztbI"></script>
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
     <!-- Chargement du CSS -->
@@ -19,7 +19,7 @@
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="css/main.css">
     <title>My Maps</title>
 </head>
 <body>
@@ -34,20 +34,44 @@
                         <li><a href="badges.html">Components</a></li>
                         <li><a href="collapsible.html">JavaScript</a></li>
                     </ul>
-                    <form class="form-inline my-2 my-lg-0 right">
-                        <i class="material-icons">search</i>
-                        <input class="form-control mr-sm-2" type="text" placeholder="Search">
-                        <button class="btn #212121 grey darken-4 my-2 my-sm-0" type="submit">Search</button>
-                    </form>
+                    <!--<form class="form-inline my-2 my-lg-0 right">
+                        <div class="input-field">
+                            <i class="material-icons">search</i>
+                            <input class="form-control mr-sm-2" type="text" placeholder="Search">
+                            <button class="btn #212121 grey darken-4 my-2 my-sm-0" type="submit">Search</button>
+                        </div>
+                    </form>-->
                 </div>
             </div>
         </nav>
     </div>
 </header>
+<div class="row">
+    <div id="itineraire" class="container">
+        <form class="col s12">
+            <div class="row">
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">room</i>
+                    <input id="from_travel" name="from_travel" type="text" class="validate">
+                    <label for="from_travel">De</label>
+                </div>
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">room</i>
+                    <input id="end_travel" name="end_travel" type="text" class="validate">
+                    <label for="end_travel">Vers</label>
+                </div>
+                <button id="travel" class="btn waves-effect waves-light #212121 grey darken-4" type="button" name="action">Submit
+                    <i class="material-icons right">send</i>
+                </button>
+            </div>
+        </form>
+    </div>
+    <div id="panel"></div>
+</div>
 
 <div class="row">
     <div id="map"></div>
 </div>
-<script src="main.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

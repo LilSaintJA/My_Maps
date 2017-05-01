@@ -1,6 +1,6 @@
 window.addEventListener('load', function() {
     'use strict';
-    function initMap() {
+    function initialize() {
 
         var map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: -34.397, lng: 150.644},
@@ -33,5 +33,5 @@ window.addEventListener('load', function() {
             'Error: The Geolocation service failed.' :
             'Error: Your browser doesn\'t support geolocation.');
     }
-    initMap();
+    initialize();
 });
