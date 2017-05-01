@@ -29,6 +29,7 @@
 
 ## Plugin-specific files:
 .idea/jsLinters
+
 # IntelliJ
 /out/
 
