@@ -1,0 +1,10 @@
+/* Main */
+
+/* Container MAP */
+#map {
+    width: 800px;
+    height: 600px;
+    box-sizing: border-box;
+    margin: 50px auto;
+    background-color: aquamarine;
+}
