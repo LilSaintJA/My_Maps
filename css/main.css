@@ -1,4 +1,10 @@
-/* Main */
+/* Main CSS */
+
+/* BODY */
+body {
+    background: url("../img/mapsFont.jpg") no-repeat center center;
+    background-size: cover;
+}
 
 /* Container MAP */
 #map {
@@ -6,5 +12,11 @@
     height: 600px;
     box-sizing: border-box;
     margin: 50px auto;
-    background-color: aquamarine;
+}
+
+/* Container Map-Panel */
+#map-panel {
+    border-radius: 5px;
+    padding: 20px;
+    box-sizing: border-box;
 }
