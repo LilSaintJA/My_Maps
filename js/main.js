@@ -5,7 +5,9 @@ window.addEventListener('load', function () {
     var map,
         direction,
         panel,
-        btn = document.getElementById('travel');
+        btn = document.getElementById('travel'),
+        infoWindow = new google.maps.InfoWindow({map: map});
+
 
     /**
      *
@@ -13,12 +15,13 @@ window.addEventListener('load', function () {
      * @param pos
      */
     function handleLocationError(browserHasGeolocation, pos) {
-        var infoWindow = new google.maps.InfoWindow({map: map});
 
         infoWindow.setPosition(pos);
         infoWindow.setContent(browserHasGeolocation ?
             'Error: The Geolocation service failed.' :
             'Error: Your browser doesn\'t support geolocation.');
+        infoWindow.setContent('Location found.');
+
     }
 
     /**
@@ -26,9 +29,14 @@ window.addEventListener('load', function () {
      */
     function initialize() {
 
+        var latLng = new google.maps.LatLng(48.866667, 2.333333); // Correspond aux coordonnées de Paris
+
         map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: -34.397, lng: 150.644},
-            zoom: 10
+            center: latLng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            zoom: 10,
+            maxZoom: 20,
+            fullscreenControl: true
         });
 
         new AutocompleteDirectionsHandler(map);
@@ -45,20 +53,21 @@ window.addEventListener('load', function () {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
+
                 map.setCenter(pos);
             }, function () {
-                handleLocationError(true, map.getCenter());
+                handleLocationError(true, infoWindow, map.getCenter());
             });
         } else {
             // Browser doesn't support Geolocation
-            handleLocationError(false, map.getCenter());
+            handleLocationError(false, infoWindow, map.getCenter());
         }
 
         // Try HTML5 places
         var service = new google.maps.places.PlacesService(map);
         service.nearbySearch({
-            location: {lat: -34.397, lng: 150.644},
-            radius: 500
+            location: latLng,
+            radius: 5000
         }, callback);
     }
 
@@ -77,18 +86,16 @@ window.addEventListener('load', function () {
     }
 
     /**
-     *
+     * Créé un marqueur
      * @param place
      */
     function createMarker(place) {
         var placeLoc = place.geometry.location,
             marker = new google.maps.Marker({
                 map: map,
-                position: place.geometry.location,
-                title: "Hello World"
+                position: placeLoc
             });
-        console.log(placeLoc);
-        console.log('Je suis la ');
+
         google.maps.event.addListener(marker, 'click', function() {
             infoWindow.setContent(place.name);
             infoWindow.open(map, this);
@@ -112,12 +119,10 @@ window.addEventListener('load', function () {
         originInput = document.getElementById('from_travel');
         destinationInput = document.getElementById('end_travel');
 
-        console.log(originInput);
-        console.log(destinationInput);
-
-        this.directionsService = new google.maps.DirectionsService;
-        this.directionsDisplay = new google.maps.DirectionsRenderer;
+        this.directionsService = new google.maps.DirectionsService();
+        this.directionsDisplay = new google.maps.DirectionsRenderer();
         this.directionsDisplay.setMap(map);
+        this.directionsDisplay.setPanel(document.getElementById("map-panel"));
 
         originAutocomplete = new google.maps.places.Autocomplete(
             originInput, {placeIdOnly: true}
