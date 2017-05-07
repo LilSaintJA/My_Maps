@@ -3,43 +3,67 @@ window.addEventListener('load', function () {
     'use strict';
 
     var map,
-        latLng,
-        marker,
         direction,
+        panel,
         btn = document.getElementById('travel'),
         infoWindow = new google.maps.InfoWindow({map: map});
 
+
     /**
-     * Permet de récupérer la position de l'utilisateur
      *
-     * @param position
+     * @param browserHasGeolocation
+     * @param pos
      */
-    function getMyPosition(position) {
+    function handleLocationError(browserHasGeolocation, pos) {
 
-        var pos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-        };
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+            'Error: The Geolocation service failed.' :
+            'Error: Your browser doesn\'t support geolocation.');
+        infoWindow.setContent('Location found.');
 
-        latLng = new google.maps.LatLng(pos);
-
-        // Ajout d'un marqueur à la position trouvée
-        marker = new google.maps.Marker({
-            position: latLng,
-            map: map,
-            icon: 'img/Place_Optimization_copie.png'
-        });
-
-        // Permet de centrer la carte sur la position latlng
-        map.setCenter(latLng);
     }
 
     /**
-     * Initialise les places impoortantes
-     * dans un rayon de 5000km
      *
      */
-    function monumentPlaces() {
+    function initialize() {
+
+        var latLng = new google.maps.LatLng(48.866667, 2.333333); // Correspond aux coordonnées de Paris
+
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: latLng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            zoom: 10,
+            maxZoom: 20,
+            fullscreenControl: true
+        });
+
+        new AutocompleteDirectionsHandler(map);
+
+        direction = new google.maps.DirectionsRenderer({
+            map: map,
+            panel: panel
+        });
+
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                map.setCenter(pos);
+            }, function () {
+                handleLocationError(true, infoWindow, map.getCenter());
+            });
+        } else {
+            // Browser doesn't support Geolocation
+            handleLocationError(false, infoWindow, map.getCenter());
+        }
+
+        // Try HTML5 places
         var service = new google.maps.places.PlacesService(map);
         service.nearbySearch({
             location: latLng,
@@ -49,43 +73,45 @@ window.addEventListener('load', function () {
     }
 
     /**
-     * Fonction de rappel, pour l'appel asynchrone
      *
      * @param results
      * @param status
      */
     function callback(results, status) {
-        var i;
-
+        var i,
+            originInput,
+            destinationInput;
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             for (i = 0; i < results.length; i += 1) {
                 createMarker(results[i]);
             }
         }
 
-        // Créé un marqueur au click sur la carte
         google.maps.event.addListener(map, 'click', function (event) {
             new google.maps.Marker({
                 map: map,
                 position: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())
             });
         });
+
+        originInput = document.getElementById('from_travel');
+        destinationInput = document.getElementById('end_travel');
+
+        // originInput.value =
     }
 
     /**
-     * Créé un marqueur pour les emplacements
-     * spécifiés dans monumentsPlaces()
-     *
+     * Créé un marqueur
      * @param place
      */
     function createMarker(place) {
         var placeLoc = place.geometry.location,
             marker = new google.maps.Marker({
                 map: map,
-                position: placeLoc
+                position: placeLoc,
+                title: "You are here"
             });
 
-        // Affiche des informations sur le marqueur cliquer
         google.maps.event.addListener(marker, 'click', function() {
             infoWindow.setContent(place.name);
             infoWindow.open(map, this);
@@ -93,9 +119,6 @@ window.addEventListener('load', function () {
     }
 
     /**
-     * Gère l'autocompletion des inputs
-     *
-     * @param map
      * @constructor
      */
     function AutocompleteDirectionsHandler(map) {
@@ -125,12 +148,20 @@ window.addEventListener('load', function () {
             destinationInput, {placeIdOnly: true}
         );
 
+        /*this.setupClickListener('changemode-walking', 'WALKING');
+        this.setupClickListener('changemode-transit', 'TRANSIT');
+        this.setupClickListener('changemode-driving', 'DRIVING');*/
+
         this.setupPlaceChangedListener(originAutocomplete, 'ORIG');
         this.setupPlaceChangedListener(destinationAutocomplete, 'DEST');
+
     }
 
+    /*AutocompleteDirectionsHandler.prototype.setupClickListener = function (id, mode) {
+
+    }*/
+
     /**
-     * Initialise les
      *
      * @param autocomplete
      * @param mode
@@ -139,22 +170,20 @@ window.addEventListener('load', function () {
         var self = this;
 
         autocomplete.bindTo('bounds', this.map);
-
         autocomplete.addListener('place_changed', function () {
-            var place = autocomplete.getPlace();
+           var place = autocomplete.getPlace();
 
-            if (!place.place_id) {
-                window.alert('Please select an option from the dropdown list');
-                return false;
-            }
+           if (!place.place_id) {
+               window.alert('Please select an option from the dropdown list');
+               return false;
+           }
 
-            if (mode === 'ORIG') {
-                console.log(self.originPlaceId = place.place_id);
-                self.originPlaceId = place.place_id;
-            } else {
-                self.destinationPlaceId = place.place_id;
-            }
-            self.route();
+           if (mode === 'ORIG') {
+               self.originPlaceId = place.place_id;
+           } else {
+               self.destinationPlaceId = place.place_id;
+           }
+           self.route();
         });
     };
 
@@ -163,40 +192,23 @@ window.addEventListener('load', function () {
      * @returns {boolean}
      */
     AutocompleteDirectionsHandler.prototype.route = function () {
-        var self = this;
-        latLng = new google.maps.LatLng(48.866667, 2.333333);
+      if (!this.originPlaceId || !this.destinationPlaceId) {
+          return false;
+      }
 
-        var values = [latLng],
-            waypts = [],
-            i;
-        console.log(values[0]);
+      var self = this;
 
-        for (i = 0; i < values.length; i += 1) {
-            console.log(values[i]);
-            waypts.push({
-                location: values[i],
-                stopover: true
-            });
-        }
-        console.log(waypts);
-
-        if (!this.originPlaceId || !this.destinationPlaceId) {
-            return false;
-        }
-
-        this.directionsService.route({
-            origin: {'placeId': this.originPlaceId},
-            destination: {'placeId': this.destinationPlaceId},
-            waypoints: waypts,
-            optimizeWaypoints: false,
-            travelMode: this.travelMode
-        }, function (response, status) {
-            if (status === 'OK') {
-                self.directionsDisplay.setDirections(response);
-            } else {
-                window.alert('Directions request failed due to ' + status);
-            }
-        });
+      this.directionsService.route({
+          origin: {'placeId': this.originPlaceId},
+          destination: {'placeId': this.destinationPlaceId},
+          travelMode: this.travelMode
+      }, function (response, status) {
+          if (status === 'OK') {
+              self.directionsDisplay.setDirections(response);
+          } else {
+              window.alert('Directions request failed due to ' + status);
+          }
+      });
     };
 
     /**
@@ -207,7 +219,6 @@ window.addEventListener('load', function () {
         var startTravel,
             endTravel,
             directionService;
-
         startTravel = document.getElementById('from_travel').value; // Le point de départ
         endTravel = document.getElementById('end_travel').value; // le point d'arrivée
 
@@ -226,46 +237,10 @@ window.addEventListener('load', function () {
         }
     }
 
-    /**
-     * Initialisation de la map
-     * Appel des fonctions secondaires
-     */
-    function initMap() {
-        latLng = new google.maps.LatLng(48.866667, 2.333333);
-
-        // Construction de la map
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: latLng,
-            zoom: 10,
-            maxZoom: 20,
-            fullscreenControl: true
-        });
-
-        // Try HTML geolocalisation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(getMyPosition);
-        } else {
-            alert('Votre navigateur ne supporte pas la géolocation');
-        }
-
-        // Try HTML5 places
-        // monumentPlaces();
-
-        // Autocomplete
-        new AutocompleteDirectionsHandler(map);
-
-        direction = new google.maps.DirectionsRenderer({
-            map: map,
-            panel: panel
-        });
-
-        calculate();
-    }
-
     btn.addEventListener('click', function() {
         console.log('Je click');
         calculate();
     });
 
-    initMap();
+    initialize();
 });
