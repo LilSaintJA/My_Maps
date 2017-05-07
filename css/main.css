@@ -13,3 +13,10 @@ body {
     box-sizing: border-box;
     margin: 50px auto;
 }
+
+/* Container Map-Panel */
+#map-panel {
+    border-radius: 5px;
+    padding: 20px;
+    box-sizing: border-box;
+}
